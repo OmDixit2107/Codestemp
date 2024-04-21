@@ -34,15 +34,21 @@ for ii = 1:51
         (w_sync * ((r_th + (2*r2)/s(ii))^2 + (x_th + x2)^2));
 end
 
+% Calculate torque for halved rotor resistance
+for ii = 1:51
+  t_ind3(ii) = (3 * v_th^2 * (0.5*r2) / s(ii)) / ...
+    (w_sync * ((r_th + (0.5*r2)/s(ii))^2 + (x_th + x2)^2));
+end
+
 % Plot the torque-speed curve
 plot(run, t_ind1, 'Color', 'k', 'LineWidth', 2.0);
 hold on;
 plot(run, t_ind2, 'Color', 'k', 'LineWidth', 2.0, 'LineStyle', '-.');
+plot(run, t_ind3, 'Color', 'k', 'LineWidth', 2.0, 'LineStyle', '--');
 xlabel('\it{n_{m}}', 'FontWeight', 'Bold');
 ylabel('\tau_{ind}', 'FontWeight', 'Bold');
 title('Induction motor torque-speed characteristic', ...
-    'FontWeight', 'Bold');
-legend('Original R_2', 'Doubled R_2');
+  'FontWeight', 'Bold');
+legend('Original R_2', 'Doubled R_2', 'Halved R_2');
 grid on;
 hold off;
-
