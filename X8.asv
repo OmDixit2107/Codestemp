@@ -1,55 +1,46 @@
-% M-file, torque_speed_curve.m
-% M-file create a plot of the torque-speed curve of the
-% induction motor of Example 7-5.
-% First, initialize the values needed in this program.
-rl = 0.641; % Stator resistance
-xl = 1.10; % Stator reactance
-r2 = 0.332; % Rotor resistance
-x2 = 0.464;
-xm = 26.3;
-v_phase = 460 / sqrt(3);
-n_sync = 1800;
-w_sync = 188.5;
-% Calculate the Thevenin voltage and impedance from Equations 7-41a and 7-43.
-v_th = v_phase * (rl + j*xl) / ((rl + j*xl) + j*xm);
-z_th = ((j*xm) * (r2 + j*x2)) / ((j*xm) + (r2 + j*x2));
-r_th = real(z_th);
-x_th = imag(z_th);
+% Generator parameters
+VT = 480; % Terminal voltage at no-load (V)
+IA_range = linspace(0, 60, 100); % Range of armature current (A)
+XS = 1.0; % Synchronous reactance (ohm)
 
-% Now calculate the torque-speed characteristic for many slips between 0 and 1.
-% Note that the first slip value is set to 0.001 instead of exactly 0 to avoid divide-by-zero problems.
-s = (0:1:50) / 50;
-s(1) = 0.001; % Slip
-run = (1 - s) * n_sync; % Mechanical speed
+% Power factors to consider
+lagging_power_factors = [0.2, 0.4, 0.6, 0.8];
+leading_power_factors = [0.2, 0.4, 0.6, 0.8];
 
-% Calculate torque for original rotor resistance
-for ii = 1:51
-    t_ind1(ii) = (3 * abs(v_th)^2 * r2 / s(ii)) / ...
-        (w_sync * ((r_th + r2 / s(ii))^2 + (x_th + x2)^2));
-end
-
-% Calculate torque for doubled rotor resistance
-for ii = 1:51
-    t_ind2(ii) = (3 * abs(v_th)^2 * (2*r2) / s(ii)) / ...
-        (w_sync * ((r_th + (2*r2)/s(ii))^2 + (x_th + x2)^2));
-end
-
-% Calculate torque for halved rotor resistance
-for ii = 1:51
-  t_ind3(ii) = (3 * abs(v_th)^2 * (0.5*r2) / s(ii)) / ...
-    (w_sync * ((r_th + (0.5*r2)/s(ii))^2 + (x_th + x2)^2));
-end
-
-% Plot the torque-speed curve
-plot(run, t_ind1, 'k-', 'LineWidth', 2.0);
+% Plot terminal characteristics for lagging power factors
+figure;
 hold on;
-
-plot(run, t_ind2, 'k-.', 'LineWidth', 2.0);
-plot(run, t_ind3, 'k--', 'LineWidth', 2.0);
-xlabel('\it{n_{m}}', 'FontWeight', 'Bold');
-ylabel('\tau_{ind}', 'FontWeight', 'Bold');
-title('Induction motor torque-speed characteristic', ...
-  'FontWeight', 'Bold');
-legend('Original R_2', 'Doubled R_2', 'Halved R_2');
-grid on;
+for lagging_pf = lagging_power_factors
+    % Calculate terminal voltage for lagging power factor
+    theta_lagging = acosd(-lagging_pf); % Power factor angle (degrees)
+    Vt_lagging = sqrt((VT + XS * IA_range * cosd(theta_lagging)).^2 + (XS * IA_range * sind(theta_lagging)).^2);
+    
+    % Plot terminal characteristics for lagging power factors
+    plot(IA_range, Vt_lagging, 'DisplayName', sprintf('PF Lagging %.1f', lagging_pf));
+end
 hold off;
+
+xlabel('Armature Current (A)');
+ylabel('Terminal Voltage (V)');
+title('Terminal Characteristics of Synchronous Generator (Lagging Power Factors)');
+legend('Location', 'best');
+grid on;
+
+% Plot terminal characteristics for leading power factors
+figure;
+hold on;
+for leading_pf = leading_power_factors
+    % Calculate terminal voltage for leading power factor
+    theta_leading = acosd(leading_pf); % Power factor angle (degrees)
+    Vt_leading = sqrt((VT + XS * IA_range * cosd(theta_leading)).^2 + (XS * IA_range * sind(theta_leading)).^2);
+    
+    % Plot terminal characteristics for leading power factors
+    plot(IA_range, Vt_leading, 'DisplayName', sprintf('PF Leading %.1f', leading_pf));
+end
+hold off;
+
+xlabel('Armature Current (A)');
+ylabel('Terminal Voltage (V)');
+title('Terminal Characteristics of Synchronous Generator (Leading Power Factors)');
+legend('Location', 'best');
+grid on;

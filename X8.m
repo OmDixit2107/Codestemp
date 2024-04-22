@@ -1,25 +1,46 @@
-% First, initialize the current amplitudes (21 values in the range 0-60 A)
-ia = (0:20) * 3;
+% Generator parameters
+VT = 480; % Terminal voltage at no-load (V)
+IA_range = linspace(0, 60, 100); % Range of armature current (A)
+XS = 1.0; % Synchronous reactance (ohm)
 
-% Now initialize all other values
-v_phase = zeros(1, 21);
-e_a = 277.0;
-x_s = 1.0;
-theta = 36.57 * (pi / 180); % Converted to radians
+% Power factors to consider
+lagging_power_factors = [0.2, 0.4, 0.6, 0.8];
+leading_power_factors = [0.2, 0.4, 0.6, 0.8];
 
-% Now calculate v-phase for each current level
-for ii = 1:21
-    v_phase(ii) = sqrt((e_a + (x_s * ia(ii) * cos(theta)))^2 + (x_s * ia(ii) * sin(theta))^2);
+% Plot terminal characteristics for lagging power factors
+figure;
+hold on;
+for lagging_pf = lagging_power_factors
+    % Calculate terminal voltage for lagging power factor
+    theta_lagging = acosd(-lagging_pf); % Power factor angle (degrees)
+    Vt_lagging = sqrt((VT + XS * IA_range * cosd(theta_lagging)).^2 + (XS * IA_range * sind(theta_lagging)).^2);
+    
+    % Plot terminal characteristics for lagging power factors
+    plot(IA_range, Vt_lagging, 'DisplayName', sprintf('PF Lagging %.1f', lagging_pf));
 end
+hold off;
 
-% Calculate terminal voltage from the phase voltage
-v_t = v_phase * sqrt(3);
-
-% Plot the terminal characteristic, remembering the
-% the line current is the same as ia
-plot(ia, v_t, 'Color', 'k', 'Linewidth', 2.0);
-xlabel('Line Current (A)', 'Fontweight', 'Bold');
-ylabel('Terminal Voltage (V)', 'Fontweight', 'Bold');
-title('Terminal Characteristic for O.S PF Lagg load', 'Fontweight', 'Bold');
+xlabel('Armature Current (A)');
+ylabel('Terminal Voltage (V)');
+title('Terminal Characteristics of Synchronous Generator (Lagging Power Factors)');
+legend('Location', 'best');
 grid on;
-axis([0 60 400 550]); % Adjusted the axis limits
+
+% Plot terminal characteristics for leading power factors
+figure;
+hold on;
+for leading_pf = leading_power_factors
+    % Calculate terminal voltage for leading power factor
+    theta_leading = acosd(leading_pf); % Power factor angle (degrees)
+    Vt_leading = sqrt((VT + XS * IA_range * cosd(theta_leading)).^2 + (XS * IA_range * sind(theta_leading)).^2);
+    z
+    % Plot terminal characteristics for leading power factors
+    plot(IA_range, Vt_leading, 'DisplayName', sprintf('PF Leading %.1f', leading_pf));
+end
+hold off;
+
+xlabel('Armature Current (A)');
+ylabel('Terminal Voltage (V)');
+title('Terminal Characteristics of Synchronous Generator (Leading Power Factors)');
+legend('Location', 'best');
+grid on;
